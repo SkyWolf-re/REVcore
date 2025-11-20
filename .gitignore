@@ -1,0 +1,6 @@
+zig-out/
+.zig-cache/
+*.exe
+*.obj
+*.o
+.DS_Store
