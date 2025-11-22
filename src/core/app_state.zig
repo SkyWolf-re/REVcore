@@ -25,6 +25,7 @@ pub const AppState = struct {
     layout: types.LayoutMode = .single,
 
     active_tool_index: usize = 0,
+    file_json: ?[]u8 = null,
 
     // later:
     // workspaces: []Workspace,

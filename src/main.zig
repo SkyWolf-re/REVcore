@@ -19,37 +19,92 @@ const std = @import("std");
 const render = @import("tui/render.zig");
 const terminal = @import("tui/terminal.zig");
 const app_state = @import("core/app_state.zig");
+const file_handler = @import("core/file_handler.zig");
 
 pub fn main() !void {
-    var term = try terminal.TerminalGuard.enter();
-    defer term.exit();
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    defer _ = gpa.deinit();
+    const allocator = gpa.allocator();
 
-    var stdin_file = std.fs.File.stdin();
-    var buf: [1]u8 = undefined;
+    //var term = try terminal.TerminalGuard.enter();
+    //defer term.exit();
+
+    //var stdin_file = std.fs.File.stdin();
+    //var buf: [1]u8 = undefined;
 
     const initial_size = terminal.getSize();
     var state = app_state.AppState{
         .term_width = initial_size.width,
         .term_height = initial_size.height,
+        .file_json = null,
     };
 
-    while (state.running) {
-        const size = terminal.getSize();
-        state.term_width = size.width;
-        state.term_height = size.height;
+    const argv = try std.process.argsAlloc(allocator);
+    defer std.process.argsFree(allocator, argv);
 
-        try render.clearScreen();
-        try render.drawHeader(state.term_width);
-        try render.drawToolList();
-        try render.drawFooter(state.term_width, state.term_height);
+    if (argv.len > 1) {
+        const path = std.mem.sliceTo(argv[1], 0);
+        state.file_json = file_handler.runFileValidator(allocator, path) catch |err| blk: {
+            std.debug.print(
+                "REVcore: fileValidator failed for '{s}': {s}\n",
+                .{ path, @errorName(err) },
+            );
+            break :blk null;
+        };
+    }
 
-        const n = try stdin_file.read(&buf);
-        if (n == 0) break;
+    //while (state.running) {
+    //const size = terminal.getSize();
+    //  state.term_width = size.width;
+    //state.term_height = size.height;
 
-        switch (buf[0]) {
-            'q' => state.running = false,
-            else => {},
-            //more buttons ahh
+    //try render.clearScreen();
+    //try render.drawHeader(state.term_width);
+    //try render.drawToolList();
+    //try render.drawFooter(state.term_width, state.term_height);
+
+    //const n = try stdin_file.read(&buf);
+    //if (n == 0) break;
+
+    //switch (buf[0]) {
+    //    'q' => state.running = false,
+    //    else => {},
+    //    //more buttons ahh
+    //}
+    //}
+    {
+        var term = try terminal.TerminalGuard.enter();
+        defer term.exit();
+
+        var stdin_file = std.fs.File.stdin();
+        var buf: [1]u8 = undefined;
+
+        while (state.running) {
+            const size = terminal.getSize();
+            state.term_width = size.width;
+            state.term_height = size.height;
+
+            try render.clearScreen();
+            try render.drawHeader(state.term_width);
+            try render.drawToolList();
+            try render.drawFooter(state.term_width, state.term_height);
+
+            const n = try stdin_file.read(&buf);
+            if (n == 0) break;
+
+            switch (buf[0]) {
+                'q' => state.running = false,
+                else => {},
+            }
         }
+    }
+
+    // Testing purposes only
+    if (state.file_json) |json| {
+        std.debug.print("\n=== fileValidator JSON ===\n{s}\n", .{json});
+        allocator.free(json);
+        state.file_json = null;
+    } else {
+        std.debug.print("\n(no file_json in state; run as `REVcore <path>`)\n", .{});
     }
 }
