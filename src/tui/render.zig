@@ -1,7 +1,7 @@
 //! render.zig
 //!
 //! Author: skywolf
-//! Date: 2025-11-20
+//! Date: 2025-11-20 | Last modified: 2025-11-22
 //!
 //! Low-level rendering helpers for the TUI
 //! - Handles ANSI screen clearing and basic header/list drawing
@@ -24,6 +24,11 @@ pub fn clearScreen() !void {
     std.debug.print("\x1b[2J\x1b[H", .{});
 }
 
+fn moveCursor(row: u16, col: u16) !void {
+    //ESC[{row};{col}H
+    std.debug.print("\x1b[{d};{d}H", .{ row, col });
+}
+
 pub fn drawHeader(width: u16) !void {
     const title = "REVcore – REVenge TUI orchestrator (skeleton)";
     const len = @min(title.len, width);
@@ -35,5 +40,14 @@ pub fn drawToolList() !void {
     for (registry.tools, 0..) |tool, idx| {
         std.debug.print("  [{d}] {s} ({s})\n", .{ idx, tool.id, tool.name });
     }
-    std.debug.print("\nPress q to quit\n", .{});
+}
+
+pub fn drawFooter(width: u16, height: u16) !void {
+    if (height == 0) return; //paranoia
+
+    try moveCursor(height, 1);
+
+    const msg = "Press q to quit";
+    const len = @min(msg.len, width);
+    std.debug.print("{s}", .{msg[0..len]});
 }

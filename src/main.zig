@@ -1,7 +1,7 @@
 //! main.zig
 //!
 //! Author: skywolf
-//! Date: 2025-11-20
+//! Date: 2025-11-20 | Last modified: 2025-11-22
 //!
 //! Entry point for REVcore
 //! - Initializes global allocators and basic terminal I/O
@@ -17,25 +17,39 @@
 
 const std = @import("std");
 const render = @import("tui/render.zig");
+const terminal = @import("tui/terminal.zig");
+const app_state = @import("core/app_state.zig");
 
 pub fn main() !void {
-    // stdin file handle
-    var stdin_file = std.fs.File.stdin();
+    var term = try terminal.TerminalGuard.enter();
+    defer term.exit();
 
-    const width: u16 = 80;
+    var stdin_file = std.fs.File.stdin();
     var buf: [1]u8 = undefined;
 
-    while (true) {
+    const initial_size = terminal.getSize();
+    var state = app_state.AppState{
+        .term_width = initial_size.width,
+        .term_height = initial_size.height,
+    };
+
+    while (state.running) {
+        const size = terminal.getSize();
+        state.term_width = size.width;
+        state.term_height = size.height;
+
         try render.clearScreen();
-        try render.drawHeader(width);
+        try render.drawHeader(state.term_width);
         try render.drawToolList();
+        try render.drawFooter(state.term_width, state.term_height);
 
-        const read_bytes = try stdin_file.read(&buf);
-        if (read_bytes == 0) break; // EOF
+        const n = try stdin_file.read(&buf);
+        if (n == 0) break;
 
-        const ch = buf[0];
-        if (ch == 'q') break;
-
-        //later: handle more keys here
+        switch (buf[0]) {
+            'q' => state.running = false,
+            else => {},
+            //more buttons ahh
+        }
     }
 }
