@@ -4,6 +4,11 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
+    const revsdk_dep = b.dependency("revsdk", .{
+        .target = target,
+        .optimize = optimize,
+    });
+
     const exe = b.addExecutable(.{
         .name = "REVcore",
         .root_module = b.createModule(.{
@@ -12,6 +17,8 @@ pub fn build(b: *std.Build) void {
             .optimize = optimize,
         }),
     });
+
+    exe.root_module.addImport("revsdk", revsdk_dep.module("revsdk"));
 
     b.installArtifact(exe);
 

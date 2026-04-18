@@ -1,3 +1,3 @@
 stty -icanon -echo     
-./../zig-out/bin/REVcore stringer
+./../zig-out/bin/REVcore REVcore
 stty sane  

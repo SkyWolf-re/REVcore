@@ -1,0 +1,20 @@
+.{
+    .name = .REVcore,
+    .version = "0.1.0",
+    .minimum_zig_version = "0.15.1",
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        "scripts",
+        "tools",
+        "README.md",
+        "LICENSE",
+    },
+    .fingerprint = 0x8b29dc075ac9f07f,
+    .dependencies = .{
+        .revsdk = .{
+      		.path = "../REVSDK",
+    	},
+    },
+}

@@ -19,7 +19,8 @@ On success:
         "type": "<human readable type, e.g. 'PE (Portable Executable)'>",
         "architecture": "<human readable arch, e.g. 'x86-64'>",
         "format": "PE" | "ELF" | "Mach-O" | "Unknown",
-        "magic_number": "<hex-encoded leading bytes>"
+        "magic_number": "<hex-encoded leading bytes>",
+        "size": <bytes>,
         "header_status": "success",
         "header_info": {
             "status": "success" | "error" | "unsupported",
@@ -172,6 +173,7 @@ def file_validation(file_path: str) -> Dict[str, Any]:
                 "type": file_type,
                 "architecture": architecture,
                 "magic_number": magic_bytes.hex(),
+                "size": os.path.getsize(file_path)
             }
 
             return {

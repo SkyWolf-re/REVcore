@@ -37,8 +37,8 @@ pub fn drawHeader(width: u16) !void {
 
 pub fn drawToolList() !void {
     std.debug.print("\nTools (demo registry):\n", .{});
-    for (registry.tools, 0..) |tool, idx| {
-        std.debug.print("  [{d}] {s} ({s})\n", .{ idx, tool.id, tool.name });
+    for (registry.getTools(), 0..) |tool, idx| {
+        std.debug.print("  [{d}] {s} ({s})\n", .{ idx, tool.name, tool.id });
     }
 }
 
