@@ -1,7 +1,7 @@
 //! render.zig
 //!
 //! Author: skywolf
-//! Date: 2025-11-20 | Last modified: 2025-11-22
+//! Date: 2025-11-20 | Last modified: 2026-08-04
 //!
 //! Low-level rendering helpers for the TUI
 //! - Handles ANSI screen clearing and basic header/list drawing
@@ -10,7 +10,7 @@
 //!
 //! Notes:
 //! - For the initial skeleton, this uses `std.debug.print` directly;
-//!   later it will be upgraded but for now I'm a lazy fuck.
+//!   later it will be upgraded but for now I'm a lazy fuck (now I did it huh)
 //! - All drawing here should be deterministic so that screen updates are
 //!   easy to reason about and test.
 //! - Higher-level components (workspaces, widgets) should call into this
@@ -37,8 +37,49 @@ pub fn drawHeader(width: u16) !void {
 
 pub fn drawToolList() !void {
     std.debug.print("\nTools (demo registry):\n", .{});
-    for (registry.getTools(), 0..) |tool, idx| {
-        std.debug.print("  [{d}] {s} ({s})\n", .{ idx, tool.name, tool.id });
+
+    const tools = registry.getTools();
+
+    if (tools.len == 0) {
+        std.debug.print("  No registered tools\n", .{});
+    } else {
+        for (tools, 0..) |tool, idx| {
+            std.debug.print(
+                "  [{d}] {s} ({s}) [{s}]\n",
+                .{
+                    idx,
+                    tool.descriptor.name,
+                    tool.descriptor.id,
+                    @tagName(tool.state),
+                },
+            );
+
+            if (tool.status_message) |message| {
+                std.debug.print(
+                    "      {s}\n",
+                    .{message},
+                );
+            }
+        }
+    }
+
+    const issues = registry.getIssues();
+
+    if (issues.len > 0) {
+        std.debug.print("\nDiscovery issues:\n", .{});
+
+        for (issues, 0..) |issue, idx| {
+            std.debug.print(
+                "  [{d}] [{s}] {s}\n" ++
+                    "      {s}\n",
+                .{
+                    idx,
+                    @tagName(issue.kind),
+                    issue.path,
+                    issue.message,
+                },
+            );
+        }
     }
 }
 
