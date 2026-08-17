@@ -21,6 +21,14 @@ const terminal = @import("tui/terminal.zig");
 const app_state = @import("core/app_state.zig");
 const file_handler = @import("core/file_handler.zig");
 const registry = @import("core/registry.zig");
+const adapter_runtime = @import("core/adapter_runtime.zig");
+
+// temp for debugging
+const adapter_session = @import("core/adapter_session.zig");
+
+comptime {
+    _ = adapter_session.AdapterSession;
+}
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
@@ -34,6 +42,7 @@ pub fn main() !void {
     //var buf: [1]u8 = undefined;
 
     try registry.loadToolsFromDir(allocator, "tools");
+    try adapter_runtime.handshakeDiscoveredTools(allocator);
     defer registry.deinit(allocator);
 
     const initial_size = terminal.getSize();

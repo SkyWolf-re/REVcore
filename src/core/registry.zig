@@ -255,7 +255,7 @@ fn loadToolFromManifest(
         widgets[index] = .{
             .id = id,
             .name = name,
-            .widget_type = mapWidgetType(widget.widget_type),
+            .widget_type = mapWidgetType(widget.type),
             .min_w = widget.min_w,
             .min_h = widget.min_h,
         };

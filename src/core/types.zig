@@ -97,7 +97,7 @@ pub const ToolState = enum {
     /// REVcore is launching the adapter or waiting for its handshake
     handshaking,
 
-    ///Adapter answered correctly and can accept invocations
+    /// Adapter passed active verification and is eligible for invocations
     ready,
 
     /// Adapter could not be found, launched, or accessed
